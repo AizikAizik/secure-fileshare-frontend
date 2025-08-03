@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from "react";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { useIdleTimer } from "react-idle-timer";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./queryClient";
+import Register from "./components/Register";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+  const navigate = useNavigate();
+  const timeout = 10 * 60 * 1000; // 10 minutes
+
+  const onIdle = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("privateKey"); // Clear sensitive data
+    navigate("/login", { replace: true }); // Redirect to login, replace history
+  };
+
+  useIdleTimer({
+    timeout,
+    onIdle,
+    debounce: 500,
+  });
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="min-h-screen min-w-screen bg-gray-100 flex items-center justify-center">
+      <Routes>
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<div>Login Placeholder</div>} />{" "}
+        {/* Add Login.tsx later */}
+        <Route
+          path="/dashboard"
+          element={<div>Dashboard Placeholder</div>}
+        />{" "}
+        {/* Add Dashboard.tsx later */}
+        <Route path="/" element={<div>Home Placeholder</div>} />
+      </Routes>
+    </div>
+  );
+};
 
-export default App
+// Wrap with BrowserRouter and QueryClientProvider
+const AppWrapper: React.FC = () => (
+  <QueryClientProvider client={queryClient}>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </QueryClientProvider>
+);
+
+export default AppWrapper;
