@@ -4,6 +4,7 @@ import { useIdleTimer } from "react-idle-timer";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./queryClient";
 import Register from "./components/Register";
+import Login from "./components/Login";
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -33,12 +34,8 @@ const App: React.FC = () => {
     <div className="min-h-screen min-w-screen bg-gray-100 flex items-center justify-center">
       <Routes>
         <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<div>Login Placeholder</div>} />{" "}
-        {/* Add Login.tsx later */}
-        <Route
-          path="/dashboard"
-          element={<div>Dashboard Placeholder</div>}
-        />{" "}
+        <Route path="/login" element={<Login />} />{" "}
+        <Route path="/dashboard" element={<div>Dashboard Placeholder</div>} />{" "}
         {/* Add Dashboard.tsx later */}
         <Route path="/" element={<div>Home Placeholder</div>} />
       </Routes>

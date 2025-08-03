@@ -2,27 +2,17 @@ import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { generateKeyPair } from "../services/cryptoService";
 
-const Register: React.FC = () => {
+const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const { publicKey, privateKey } = await generateKeyPair();
-      localStorage.setItem(
-        "privateKey",
-        JSON.stringify(await crypto.subtle.exportKey("pkcs8", privateKey))
-      );
-      const { data } = await api.post("/auth/register", {
-        email,
-        password,
-        publicKey,
-      });
+      const { data } = await api.post("/auth/login", { email, password });
       localStorage.setItem("token", data.token);
-      navigate("/dashboard", { replace: true }); // Navigate to dashboard
+      navigate("/dashboard", { replace: true });
     },
   });
 
@@ -36,7 +26,7 @@ const Register: React.FC = () => {
       onSubmit={handleSubmit}
       className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md"
     >
-      <h2 className="text-2xl font-bold mb-4 text-blue-400">Register</h2>
+      <h2 className="text-2xl font-bold mb-4 text-blue-400">Login</h2>
       <input
         type="email"
         value={email}
@@ -55,7 +45,7 @@ const Register: React.FC = () => {
         type="submit"
         className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 cursor-pointer transition-colors"
       >
-        Register
+        Login
       </button>
       {mutation.isError && (
         <p className="text-red-500 mt-2">Error: {mutation.error.message}</p>
@@ -64,4 +54,4 @@ const Register: React.FC = () => {
   );
 };
 
-export default Register;
+export default Login;
