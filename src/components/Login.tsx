@@ -22,35 +22,51 @@ const Login: React.FC = () => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md"
-    >
-      <h2 className="text-2xl font-bold mb-4 text-blue-400">Login</h2>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-        className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-        className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
-      />
-      <button
-        type="submit"
-        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 cursor-pointer transition-colors"
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-lg p-8 bg-white rounded-lg shadow-md"
       >
-        Login
-      </button>
-      {mutation.isError && (
-        <p className="text-red-500 mt-2">Error: {mutation.error.message}</p>
-      )}
-    </form>
+        <h2 className="text-2xl font-bold mb-4 text-blue-700 text-center">
+          Login
+        </h2>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+        <button
+          type="submit"
+          className="w-full bg-blue-700 text-white p-2 rounded hover:bg-blue-500 transition-colors"
+        >
+          Login
+        </button>
+        {mutation.isError && (
+          <p className="text-red-500 mt-2 text-center">
+            Error: {mutation.error.message}
+          </p>
+        )}
+        <p className="mt-4 text-center text-gray-600">
+          New user?{" "}
+          <button
+            type="button"
+            onClick={() => navigate("/register")}
+            className="text-blue-700 hover:underline"
+          >
+            Register
+          </button>
+        </p>
+      </form>
+    </div>
   );
 };
 

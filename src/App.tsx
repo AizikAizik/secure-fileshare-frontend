@@ -5,6 +5,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./queryClient";
 import Register from "./components/Register";
 import Login from "./components/Login";
+import Home from "./components/Homepage";
+import Navbar from "./components/Navbar";
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -31,14 +33,18 @@ const App: React.FC = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen min-w-screen bg-gray-100 flex items-center justify-center">
-      <Routes>
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />{" "}
-        <Route path="/dashboard" element={<div>Dashboard Placeholder</div>} />{" "}
-        {/* Add Dashboard.tsx later */}
-        <Route path="/" element={<div>Home Placeholder</div>} />
-      </Routes>
+    <div className="min-h-screen min-w-screen bg-gray-100 flex flex-col">
+      <Navbar /> {/* Shared Navbar rendered once here */}
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+          {/* Add more routes as needed */}
+        </Routes>
+      </main>
+      {/* Optional: Shared footer if needed */}
     </div>
   );
 };

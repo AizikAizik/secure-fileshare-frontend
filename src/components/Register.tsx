@@ -22,7 +22,7 @@ const Register: React.FC = () => {
         publicKey,
       });
       localStorage.setItem("token", data.token);
-      navigate("/dashboard", { replace: true }); // Navigate to dashboard
+      navigate("/dashboard", { replace: true });
     },
   });
 
@@ -32,35 +32,51 @@ const Register: React.FC = () => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md"
-    >
-      <h2 className="text-2xl font-bold mb-4 text-blue-400">Register</h2>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-        className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-        className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
-      />
-      <button
-        type="submit"
-        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 cursor-pointer transition-colors"
+    <div className="min-h-screen flex items-center justify-center bg-neutral p-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-lg p-8 bg-white rounded-lg shadow-md"
       >
-        Register
-      </button>
-      {mutation.isError && (
-        <p className="text-red-500 mt-2">Error: {mutation.error.message}</p>
-      )}
-    </form>
+        <h2 className="text-2xl font-bold mb-6 text-blue-700 text-center">
+          Register
+        </h2>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          className="w-full p-3 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-primary text-lg"
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          className="w-full p-3 mb-6 border rounded focus:outline-none focus:ring-2 focus:ring-primary text-lg"
+        />
+        <button
+          type="submit"
+          className="w-full bg-blue-700 text-white p-3 rounded hover:bg-secondary text-lg font-semibold"
+        >
+          Register
+        </button>
+        {mutation.isError && (
+          <p className="text-red-500 mt-4 text-center">
+            Error: {mutation.error.message}
+          </p>
+        )}
+        <p className="mt-4 text-center text-gray-600 text-lg">
+          Already a user?{" "}
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
+            className="text-blue-700 hover:underline"
+          >
+            Login
+          </button>
+        </p>
+      </form>
+    </div>
   );
 };
 
