@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../services/api";
+import FileUpload from "./FileUpload";
 
 interface Owner {
   _id: string;
@@ -49,6 +50,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-grow container mx-auto px-4 py-8">
+        <FileUpload />
         <h1 className="text-3xl font-bold text-blue-700 mb-6">Your Files</h1>
         {files?.length === 0 ? (
           <p className="text-gray-600 text-center">
