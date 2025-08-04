@@ -7,6 +7,7 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 import Home from "./components/Homepage";
 import Navbar from "./components/Navbar";
+import Dashboard from "./components/Dashboard";
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ const App: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+          <Route path="/dashboard" element={<Dashboard />} />
           {/* Add more routes as needed */}
         </Routes>
       </main>

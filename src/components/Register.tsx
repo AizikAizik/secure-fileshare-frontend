@@ -45,14 +45,14 @@ const Register: React.FC = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
-          className="w-full p-3 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-primary text-lg"
+          className="w-full p-3 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg text-gray-700"
         />
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          className="w-full p-3 mb-6 border rounded focus:outline-none focus:ring-2 focus:ring-primary text-lg"
+          className="w-full p-3 mb-6 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg text-gray-700"
         />
         <button
           type="submit"
