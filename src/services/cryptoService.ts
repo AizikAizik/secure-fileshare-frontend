@@ -68,12 +68,14 @@ export async function decryptSymmetricKey(
 ): Promise<CryptoKey> {
   const encryptedBuffer = Uint8Array.from(atob(encryptedKey), (c) =>
     c.charCodeAt(0)
-  );
+  ).buffer;
+
   const decrypted = await window.crypto.subtle.decrypt(
     { name: "RSA-OAEP" },
     privateKey,
     encryptedBuffer
   );
+
   return window.crypto.subtle.importKey(
     "raw",
     decrypted,

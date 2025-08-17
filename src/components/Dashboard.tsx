@@ -2,6 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../services/api";
 import FileUpload from "./FileUpload";
+import { decryptFile, decryptSymmetricKey } from "../services/cryptoService";
 
 interface Owner {
   _id: string;
@@ -28,8 +29,54 @@ const Dashboard: React.FC = () => {
     },
   });
 
-  const handleDownload = (fileId: string) => {
-    console.log(`Downloading file ${fileId}`);
+  const handleDownload = async (fileId: string, filename: string) => {
+    try {
+      // Fetch presigned URL and encrypted key from backend
+      const { data } = await api.get(`/files/download/${fileId}`);
+      const { downloadUrl, encryptedKey } = data;
+
+      // Fetch the encrypted file
+      // Fetch the encrypted file with CORS mode
+      const response = await fetch(downloadUrl, { mode: "cors" });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch file: ${response.statusText}`);
+      }
+
+      const encryptedBlob = await response.blob();
+
+      // Get private key from localStorage (assumes it's stored as JSON stringified pkcs8)
+      const privateKeyJson = localStorage.getItem("privateKey");
+      if (!privateKeyJson) throw new Error("Private key not found");
+      const privateKeyArray = JSON.parse(privateKeyJson);
+      const privateKeyBuffer = new Uint8Array(privateKeyArray).buffer; // ArrayBuffer
+
+      const privateKey = await window.crypto.subtle.importKey(
+        "pkcs8",
+        privateKeyBuffer,
+        { name: "RSA-OAEP", hash: "SHA-256" },
+        true,
+        ["decrypt"]
+      );
+
+      // Decrypt symmetric key
+      const symmetricKey = await decryptSymmetricKey(encryptedKey, privateKey);
+
+      // Decrypt file
+      const decryptedBlob = await decryptFile(encryptedBlob, symmetricKey);
+
+      // Trigger download
+      const url = URL.createObjectURL(decryptedBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+      // Handle error (e.g., show toast/message)
+    }
   };
 
   const handleShare = (fileId: string) => {
@@ -79,7 +126,7 @@ const Dashboard: React.FC = () => {
                     {/* Display name or fallback to ID */}
                     <td className="p-4 flex space-x-2">
                       <button
-                        onClick={() => handleDownload(file._id)}
+                        onClick={() => handleDownload(file._id, file.filename)}
                         className="bg-emerald-500 text-white px-4 py-2 rounded hover:bg-green-600"
                       >
                         Download

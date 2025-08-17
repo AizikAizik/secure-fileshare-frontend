@@ -6,21 +6,25 @@ import { generateKeyPair } from "../services/cryptoService";
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const mutation = useMutation({
     mutationFn: async () => {
       const { publicKey, privateKey } = await generateKeyPair();
-      localStorage.setItem(
-        "privateKey",
-        JSON.stringify(await crypto.subtle.exportKey("pkcs8", privateKey))
-      );
+
+      const exportedPriv = await crypto.subtle.exportKey("pkcs8", privateKey);
+      const privArray = Array.from(new Uint8Array(exportedPriv));
+      localStorage.setItem("privateKey", JSON.stringify(privArray));
+
       const { data } = await api.post("/auth/register", {
         email,
+        name,
         password,
         publicKey,
       });
+
       localStorage.setItem("token", data.token);
       navigate("/dashboard", { replace: true });
     },
@@ -40,6 +44,13 @@ const Register: React.FC = () => {
         <h2 className="text-2xl font-bold mb-6 text-blue-700 text-center">
           Register
         </h2>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Full Name"
+          className="w-full p-3 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg text-gray-700"
+        />
         <input
           type="email"
           value={email}
