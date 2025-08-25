@@ -8,7 +8,7 @@ const Navbar: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("privateKey");
+    // localStorage.removeItem("privateKey");
     navigate("/", { replace: true });
   };
 

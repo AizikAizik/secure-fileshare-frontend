@@ -15,7 +15,7 @@ const App: React.FC = () => {
 
   const onIdle = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("privateKey"); // Clear sensitive data
+    // localStorage.removeItem("privateKey"); // Clear sensitive data
     navigate("/login", { replace: true }); // Redirect to login, replace history
   };
 

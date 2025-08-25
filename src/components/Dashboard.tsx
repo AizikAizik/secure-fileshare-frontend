@@ -44,22 +44,8 @@ const Dashboard: React.FC = () => {
 
       const encryptedBlob = await response.blob();
 
-      // Get private key from localStorage (assumes it's stored as JSON stringified pkcs8)
-      const privateKeyJson = localStorage.getItem("privateKey");
-      if (!privateKeyJson) throw new Error("Private key not found");
-      const privateKeyArray = JSON.parse(privateKeyJson);
-      const privateKeyBuffer = new Uint8Array(privateKeyArray).buffer; // ArrayBuffer
-
-      const privateKey = await window.crypto.subtle.importKey(
-        "pkcs8",
-        privateKeyBuffer,
-        { name: "RSA-OAEP", hash: "SHA-256" },
-        true,
-        ["decrypt"]
-      );
-
       // Decrypt symmetric key
-      const symmetricKey = await decryptSymmetricKey(encryptedKey, privateKey);
+      const symmetricKey = await decryptSymmetricKey(encryptedKey);
 
       // Decrypt file
       const decryptedBlob = await decryptFile(encryptedBlob, symmetricKey);

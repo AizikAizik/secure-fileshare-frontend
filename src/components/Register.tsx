@@ -12,11 +12,7 @@ const Register: React.FC = () => {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const { publicKey, privateKey } = await generateKeyPair();
-
-      const exportedPriv = await crypto.subtle.exportKey("pkcs8", privateKey);
-      const privArray = Array.from(new Uint8Array(exportedPriv));
-      localStorage.setItem("privateKey", JSON.stringify(privArray));
+      const { publicKey } = await generateKeyPair();
 
       const { data } = await api.post("/auth/register", {
         email,
