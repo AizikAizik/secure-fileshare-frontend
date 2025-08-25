@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../services/api";
+import DOMPurify from "dompurify";
 import {
   generateSymmetricKey,
   encryptFile,
@@ -27,6 +28,9 @@ const FileUpload: React.FC = () => {
       if (!file) throw new Error("No file selected");
       if (!userData?.publicKey) throw new Error("Public key not available");
 
+      // Sanitize filename to prevent XSS (e.g., if filename is displayed later)
+      const sanitizedFilename = DOMPurify.sanitize(filename || file.name);
+
       const symmetricKey = await generateSymmetricKey();
       const encryptedFileBlob = await encryptFile(file, symmetricKey);
       const encryptedKey = await encryptSymmetricKey(
@@ -35,8 +39,8 @@ const FileUpload: React.FC = () => {
       );
 
       const formData = new FormData();
-      formData.append("file", encryptedFileBlob, filename || file.name);
-      formData.append("filename", filename || file.name);
+      formData.append("file", encryptedFileBlob, sanitizedFilename);
+      formData.append("filename", sanitizedFilename);
       formData.append("encryptedKey", encryptedKey);
 
       await api.post("/files/upload", formData, {
@@ -51,8 +55,14 @@ const FileUpload: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       setFile(e.target.files[0]);
-      setFilename(e.target.files[0].name);
+      // Sanitize on input change for immediate safety
+      setFilename(DOMPurify.sanitize(e.target.files[0].name));
     }
+  };
+
+  const handleFilenameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Sanitize custom filename input
+    setFilename(DOMPurify.sanitize(e.target.value));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -78,13 +88,15 @@ const FileUpload: React.FC = () => {
         </h2>
         <input
           type="file"
+          data-testid="file-input"
           onChange={handleFileChange}
           className="w-full p-3 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-700 text-lg text-gray-700"
         />
         <input
           type="text"
           value={filename}
-          onChange={(e) => setFilename(e.target.value)}
+          onChange={handleFilenameChange}
+          data-testid="filename-display"
           placeholder="Filename (optional)"
           className="w-full p-3 mb-6 border rounded focus:outline-none focus:ring-2 focus:ring-blue-700 text-lg"
         />

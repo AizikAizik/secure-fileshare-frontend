@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../services/api";
+import DOMPurify from "dompurify";
 import {
   decryptSymmetricKey,
   encryptSymmetricKey,
@@ -17,6 +18,7 @@ const FileShare: React.FC<FileShareProps> = ({ fileId, onClose }) => {
 
   const mutation = useMutation({
     mutationFn: async () => {
+      const sanitizedEmail = DOMPurify.sanitize(recipientEmail);
       // Step 1: Fetch sender's encrypted symmetric key and presigned URL (but we only need encryptedKey)
       const { data: downloadData } = await api.get(`/files/download/${fileId}`);
       const { encryptedKey: senderEncryptedKey } = downloadData;
@@ -26,7 +28,7 @@ const FileShare: React.FC<FileShareProps> = ({ fileId, onClose }) => {
 
       // Step 3: Fetch recipient's public key
       const { data: recipientData } = await api.get("/auth/public-key", {
-        params: { email: recipientEmail },
+        params: { email: sanitizedEmail },
       });
       const recipientPublicKey = recipientData.publicKey;
 
@@ -39,7 +41,7 @@ const FileShare: React.FC<FileShareProps> = ({ fileId, onClose }) => {
       // Step 6: Call share endpoint
       await api.post("/files/share", {
         fileId,
-        recipientEmail,
+        recipientEmail: sanitizedEmail,
         encryptedKeyForRecipient,
       });
     },
@@ -48,6 +50,11 @@ const FileShare: React.FC<FileShareProps> = ({ fileId, onClose }) => {
       onClose(); // Close modal or UI
     },
   });
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Sanitize on input change
+    setRecipientEmail(DOMPurify.sanitize(e.target.value));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +73,7 @@ const FileShare: React.FC<FileShareProps> = ({ fileId, onClose }) => {
         <input
           type="email"
           value={recipientEmail}
-          onChange={(e) => setRecipientEmail(e.target.value)}
+          onChange={handleEmailChange}
           placeholder="Recipient Email"
           className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
           required
