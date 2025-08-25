@@ -6,20 +6,56 @@ import api from "../services/api";
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [needsRestore, setNeedsRestore] = useState(false);
   const navigate = useNavigate();
 
   const mutation = useMutation({
     mutationFn: async () => {
       const { data } = await api.post("/auth/login", { email, password });
       localStorage.setItem("token", data.token);
-      navigate("/dashboard", { replace: true });
+
+      // Check if private key exists
+      const privKey = localStorage.getItem("privateKey");
+      if (!privKey) {
+        setNeedsRestore(true); // ask user to restore from backup
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
     },
   });
+
+  const handleRestore = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const text = await file.text();
+    localStorage.setItem("privateKey", text);
+
+    alert("Private key restored successfully!");
+    navigate("/dashboard", { replace: true });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     mutation.mutate();
   };
+
+  if (needsRestore) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="bg-white p-8 rounded shadow-md text-center">
+          <h2 className="text-xl font-bold text-red-600 mb-4">
+            Restore Private Key
+          </h2>
+          <p className="text-gray-700 mb-6">
+            We couldn’t find your private key locally. Please upload your backup
+            file to continue.
+          </p>
+          <input type="file" accept=".txt" onChange={handleRestore} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -46,7 +82,7 @@ const Login: React.FC = () => {
         />
         <button
           type="submit"
-          className="w-full bg-blue-700 text-white p-2 rounded hover:bg-blue-500 transition-colors"
+          className="w-full bg-blue-700 text-white p-2 rounded hover:bg-blue-500 transition-colors cursor-pointer"
         >
           Login
         </button>

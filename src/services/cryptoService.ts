@@ -1,4 +1,9 @@
-export async function generateKeyPair(): Promise<{ publicKey: string }> {
+import { arrayBufferToBase64, base64ToArrayBuffer } from "./helpers";
+
+export async function generateKeyPair(): Promise<{
+  publicKey: string;
+  privateKey: string;
+}> {
   const keyPair = await window.crypto.subtle.generateKey(
     {
       name: "RSA-OAEP",
@@ -10,37 +15,37 @@ export async function generateKeyPair(): Promise<{ publicKey: string }> {
     ["encrypt", "decrypt"]
   );
 
-  // Export public key → Base64
+  // Export public key
   const exportedPub = await window.crypto.subtle.exportKey(
     "spki",
     keyPair.publicKey
   );
   const publicKey = btoa(String.fromCharCode(...new Uint8Array(exportedPub)));
 
-  // Export private key → JSON array of bytes
+  // Export private key (base64 instead of array)
   const exportedPriv = await window.crypto.subtle.exportKey(
     "pkcs8",
     keyPair.privateKey
   );
-  const privArray = Array.from(new Uint8Array(exportedPriv));
-  localStorage.setItem("privateKey", JSON.stringify(privArray));
+  const privBase64 = btoa(String.fromCharCode(...new Uint8Array(exportedPriv)));
 
-  return { publicKey };
+  // Store in localStorage for now
+  localStorage.setItem("privateKey", privBase64);
+
+  return { publicKey, privateKey: privBase64 };
 }
 
 //
 // --- Retrieve Private Key ---
 //
 export async function getPrivateKey(): Promise<CryptoKey> {
-  const privateKeyJson = localStorage.getItem("privateKey");
-  if (!privateKeyJson) {
+  const privateKeyB64 = localStorage.getItem("privateKey");
+  if (!privateKeyB64) {
     throw new Error("Private key not found in localStorage");
   }
 
-  const privateKeyArray: number[] = JSON.parse(privateKeyJson);
-  const privateKeyBuffer = new Uint8Array(privateKeyArray).buffer;
-
-  return window.crypto.subtle.importKey(
+  const privateKeyBuffer = base64ToArrayBuffer(privateKeyB64);
+  return await window.crypto.subtle.importKey(
     "pkcs8",
     privateKeyBuffer,
     { name: "RSA-OAEP", hash: "SHA-256" },
@@ -80,7 +85,7 @@ export async function encryptSymmetricKey(
 ): Promise<string> {
   const pubKey = await window.crypto.subtle.importKey(
     "spki",
-    Uint8Array.from(atob(publicKeyStr), (c) => c.charCodeAt(0)).buffer,
+    base64ToArrayBuffer(publicKeyStr),
     { name: "RSA-OAEP", hash: "SHA-256" },
     false,
     ["encrypt"]
@@ -93,7 +98,7 @@ export async function encryptSymmetricKey(
     exportedSym
   );
 
-  return btoa(String.fromCharCode(...new Uint8Array(encrypted)));
+  return arrayBufferToBase64(encrypted);
 }
 
 //
@@ -104,15 +109,18 @@ export async function decryptSymmetricKey(
 ): Promise<CryptoKey> {
   const privateKey = await getPrivateKey();
 
-  const encryptedBuffer = Uint8Array.from(atob(encryptedKey), (c) =>
-    c.charCodeAt(0)
-  ).buffer;
+  const encryptedBuffer = base64ToArrayBuffer(encryptedKey);
+
+  console.log("Encrypted key size:", encryptedBuffer.byteLength);
 
   const decrypted = await window.crypto.subtle.decrypt(
     { name: "RSA-OAEP" },
     privateKey,
     encryptedBuffer
   );
+
+  console.log("Decrypted symmetric key size (bytes):", decrypted.byteLength);
+  // should be 32 if you exported a 256-bit AES key
 
   return window.crypto.subtle.importKey(
     "raw",
@@ -122,6 +130,32 @@ export async function decryptSymmetricKey(
     ["encrypt", "decrypt"]
   );
 }
+
+// export async function decryptSymmetricKey(
+//   encryptedKey: string
+// ): Promise<CryptoKey> {
+//   const encryptedBuffer = Uint8Array.from(atob(encryptedKey), (c) =>
+//     c.charCodeAt(0)
+//   );
+
+//   const privateKey = await getPrivateKey();
+
+//   const decrypted = await window.crypto.subtle.decrypt(
+//     { name: "RSA-OAEP" },
+//     privateKey,
+//     encryptedBuffer
+//   );
+//   console.log("Decrypted symmetric key size (bytes):", decrypted.byteLength);
+//   // should be 32 if you exported a 256-bit AES key
+
+//   return window.crypto.subtle.importKey(
+//     "raw",
+//     decrypted,
+//     { name: "AES-GCM" },
+//     true,
+//     ["encrypt", "decrypt"]
+//   );
+// }
 
 export async function decryptFile(
   encryptedBlob: Blob,

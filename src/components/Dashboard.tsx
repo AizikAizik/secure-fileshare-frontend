@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../services/api";
 import FileUpload from "./FileUpload";
 import { decryptFile, decryptSymmetricKey } from "../services/cryptoService";
+import FileShare from "./FileShare";
 
 interface Owner {
   _id: string;
@@ -28,6 +29,8 @@ const Dashboard: React.FC = () => {
       return data;
     },
   });
+
+  const [shareFileId, setShareFileId] = useState<string | null>(null);
 
   const handleDownload = async (fileId: string, filename: string) => {
     try {
@@ -66,7 +69,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleShare = (fileId: string) => {
-    console.log(`Sharing file ${fileId}`);
+    setShareFileId(fileId);
   };
 
   if (isLoading)
@@ -106,9 +109,7 @@ const Dashboard: React.FC = () => {
                     className="border-b hover:bg-gray-50 transition-colors"
                   >
                     <td className="p-4">{file.filename}</td>
-                    <td className="p-4">
-                      {file.owner.name || file.owner._id}
-                    </td>{" "}
+                    <td className="p-4">{file.owner.name || file.owner._id}</td>
                     {/* Display name or fallback to ID */}
                     <td className="p-4 flex space-x-2">
                       <button
@@ -129,6 +130,12 @@ const Dashboard: React.FC = () => {
               </tbody>
             </table>
           </div>
+        )}
+        {shareFileId && (
+          <FileShare
+            fileId={shareFileId}
+            onClose={() => setShareFileId(null)}
+          />
         )}
       </main>
     </div>
