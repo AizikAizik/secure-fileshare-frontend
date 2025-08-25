@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../services/api";
 import DOMPurify from "dompurify";
+import axios from "axios";
 import {
   decryptSymmetricKey,
   encryptSymmetricKey,
@@ -48,6 +49,14 @@ const FileShare: React.FC<FileShareProps> = ({ fileId, onClose }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["files"] }); // Refresh file list
       onClose(); // Close modal or UI
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        alert("CSRF token invalid. Please refresh the page and try again.");
+      } else {
+        console.error("Share error:", error);
+        alert("An error occurred during sharing. Please try again.");
+      }
     },
   });
 

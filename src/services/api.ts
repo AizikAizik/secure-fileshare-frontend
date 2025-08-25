@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const api = axios.create({
   baseURL: "http://localhost:5000/api", // Backend URL
@@ -9,6 +10,14 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  const csrfToken = Cookies.get("csrfToken");
+  if (
+    csrfToken &&
+    ["post", "put", "delete"].includes(config.method?.toLowerCase() || "")
+  ) {
+    config.headers["X-CSRF-Token"] = csrfToken; // Header name must match backend expectation (csurf defaults to X-CSRF-Token)
   }
   return config;
 });

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../services/api";
 import DOMPurify from "dompurify";
+import axios from "axios";
 import {
   generateSymmetricKey,
   encryptFile,
@@ -49,6 +50,14 @@ const FileUpload: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["files"] });
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        alert("CSRF token invalid. Please refresh the page and try again.");
+      } else {
+        console.error("Upload error:", error);
+        alert("An error occurred during upload. Please try again.");
+      }
     },
   });
 

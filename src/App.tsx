@@ -8,6 +8,8 @@ import Login from "./components/Login";
 import Home from "./components/Homepage";
 import Navbar from "./components/Navbar";
 import Dashboard from "./components/Dashboard";
+import api from "./services/api";
+import Cookies from "js-cookie";
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -32,6 +34,22 @@ const App: React.FC = () => {
     window.addEventListener("unauthorized", handleUnauthorized);
     return () => window.removeEventListener("unauthorized", handleUnauthorized);
   }, [navigate]);
+
+  useEffect(() => {
+    const fetchCsrf = async () => {
+      try {
+        const { data } = await api.get("/auth/csrf");
+        Cookies.set("csrfToken", data.csrfToken, {
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          expires: 1 / 24, // 1 hour
+        });
+      } catch (err) {
+        console.error("Failed to fetch CSRF token:", err);
+      }
+    };
+    fetchCsrf();
+  }, []);
 
   return (
     <div className="min-h-screen min-w-screen bg-gray-100 flex flex-col">
