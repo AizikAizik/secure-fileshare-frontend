@@ -10,6 +10,7 @@ import Navbar from "./components/Navbar";
 import Dashboard from "./components/Dashboard";
 import api from "./services/api";
 import Cookies from "js-cookie";
+import Benchmark from "./components/BenchMark";
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -60,6 +61,7 @@ const App: React.FC = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/benchmark" element={<Benchmark />} />
           {/* Add more routes as needed */}
         </Routes>
       </main>
